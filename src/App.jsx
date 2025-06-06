@@ -9,6 +9,7 @@ function App() {
   const [timeLeft, setTimeLeft] = useState(30) // 30 seconds
   const [gameStatus, setGameStatus] = useState('playing') // 'playing', 'won', 'lost'
   const { width, height } = useWindowSize()
+  const[display, setDisplay] = useState(false)
 
   //sound audio
   useEffect(()=>{
@@ -31,13 +32,28 @@ function App() {
   }
 
   // Check win condition
+  const allHeld = dice.every(die=>die.isHeld)
+  const allSame = dice.every(die=>die.value === dice[0].value)
+  const gameWinner = allHeld && allSame
   useEffect(() => {
-    const allHeld = dice.every(die => die.isHeld)
-    const allSame = dice.every(die => die.value === dice[0].value)
-    if (allHeld && allSame) {
+    if (gameWinner) {
       setGameStatus('won')
     }
   }, [dice])
+
+  //display winning message
+  useEffect(()=>{
+    let intervalId;
+
+    if(gameWinner){
+      intervalId = setTimeInterval(()=>{
+        setDisplay((prevTime)=>(!prevTime))
+      }, 1000)
+    }
+    else{
+      setDisplay(false)
+    }
+  }, [])
 
   // Countdown logic
   useEffect(() => {
@@ -128,7 +144,7 @@ function App() {
       </p>
       <p className='timer'>⏱ Time Left: {timeLeft}s</p>
 
-      {gameStatus === 'won' && <h2 className="status win">🎉 You won!!! 🎉</h2>}
+      {gameStatus === 'won' && <h2 className="status win" style={{visibility: display ? 'visible' : 'hidden'}}>🎉 You won!!! 🎉</h2>}
       {gameStatus === 'lost' && <h2 className="status lose">❌ You ran out of time! ❌</h2>}
 
       <div className='grid'>{diceElements}</div>
